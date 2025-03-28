@@ -1,6 +1,7 @@
 "use server";
 
 import { env } from "@/lib/env";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 interface AnalysisResult {
   classification: "MILLONARIA" | "PIRAMIDAL";
@@ -59,4 +60,21 @@ export async function analyzeIdea(idea: string): Promise<AnalysisResult> {
   };
 
   return result;
+}
+
+export async function getCurrentUser() {
+  const supabase = createSupabaseServerClient();
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    return { error: "No hay sesión activa" };
+  }
+
+  return { 
+    user: {
+      email: user.email || "",
+      plan: user.user_metadata.plan || "Free"
+    }
+  };
 }

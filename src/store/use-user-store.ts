@@ -38,19 +38,24 @@ const setIdeasCounter = (count: number) => {
   }))
 }
 
+const getSessionFromStorage = () => {
+  if (typeof window === 'undefined') return null
+  const storedSession = localStorage.getItem(STORAGE_KEY)
+  if (!storedSession) return null
+  return JSON.parse(storedSession)
+}
+
 export const useUserStore = create<UserState>((set) => ({
-  session: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') : null,
-  user: typeof window !== 'undefined' ? (() => {
-    const session = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')
-    if (session?.user) {
-      return {
-        email: session.user.email || "",
-        plan: session.user.user_metadata.plan || "Free",
-        ideasToday: getIdeasCounter()
-      }
+  session: getSessionFromStorage(),
+  user: (() => {
+    const session = getSessionFromStorage()
+    if (!session?.user) return null
+    return {
+      email: session.user.email || "",
+      plan: session.user.user_metadata.plan || "Free",
+      ideasToday: getIdeasCounter()
     }
-    return null
-  })() : null,
+  })(),
   setSession: (session) => {
     if (session) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
@@ -67,7 +72,23 @@ export const useUserStore = create<UserState>((set) => ({
       set({ session: null, user: null })
     }
   },
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    const session = getSessionFromStorage()
+    if (session && user) {
+      const updatedSession = {
+        ...session,
+        user: {
+          ...session.user,
+          user_metadata: {
+            ...session.user.user_metadata,
+            plan: user.plan
+          }
+        }
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSession))
+      set({ session: updatedSession, user })
+    }
+  },
   incrementIdeasToday: () => {
     set((state) => {
       if (!state.user) return state

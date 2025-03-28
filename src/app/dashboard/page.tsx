@@ -22,7 +22,7 @@ import {
   ArrowRight,
   Lock,
 } from "lucide-react";
-import { analyzeIdea } from "./actions";
+import { analyzeIdea, getCurrentUser } from "./actions";
 import { useUserStore } from "@/store/use-user-store";
 import { logout } from "@/app/(auth)/actions";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -40,6 +40,7 @@ export default function Dashboard() {
     logout: logoutStore,
     user,
     incrementIdeasToday,
+    setUser,
   } = useUserStore();
   const toast = useToast();
 
@@ -58,7 +59,23 @@ export default function Dashboard() {
       router.replace("/login");
       return;
     }
-  }, [session, router]);
+
+    const refreshUserData = async () => {
+      const { user: updatedUser, error } = await getCurrentUser();
+      if (error) {
+        toast.error(error);
+        return;
+      }
+      if (updatedUser) {
+        setUser({
+          ...updatedUser,
+          ideasToday: user?.ideasToday || 0
+        });
+      }
+    };
+
+    refreshUserData();
+  }, [router]);
 
   const handleAnalyzeIdea = () => {
     if (user?.plan === "Free" && user.ideasToday >= 1) {

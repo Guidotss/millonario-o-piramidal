@@ -58,9 +58,9 @@ export default function ProPage() {
       setSuccess(true);
       if (session) {
         setUser({
-          email: user?.user_metadata.email || "",
-          plan: user?.user_metadata.plan || "Free",
-          ideasToday: 0,
+          email: user?.email || "",
+          plan: "Pro",
+          ideasToday: 0
         });
       }
 
@@ -80,7 +80,7 @@ export default function ProPage() {
 
   const user = {
     email: session.user.email || "",
-    plan: "Free",
+    plan: session.user.user_metadata.plan || "Free",
   };
 
   return (
