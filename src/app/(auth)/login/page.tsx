@@ -29,6 +29,8 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.removeItem("ideas-counter");
+    
     const { session, error } = await login(email, password);
     if (error) {
       toast.error(error);

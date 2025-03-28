@@ -1,45 +1,31 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useUserStore } from "@/store/use-user-store"
 import { register } from "@/app/(auth)/actions"
+import { useToast } from "./use-toast"
 
 export function useRegister() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [acceptTerms, setAcceptTerms] = useState(false)
   const router = useRouter()
-  const { setSession } = useUserStore()
-  
+  const toast = useToast()
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name || !email || !password || !confirmPassword) {
-      
-      return
+    try {
+      const { error } = await register(name, email, password)
+      if (error) {
+        toast.error(error)
+      } else {
+        toast.success("Cuenta creada exitosamente")
+        router.push("/login")
+      }
+    } catch (error) {
+      console.error("Error al registrar:", error)
+      toast.error("Error al crear la cuenta")
     }
-
-    if (password !== confirmPassword) {
-      
-      return
-    }
-
-    if (!acceptTerms) {
-      
-      return
-    }
-
-    const { session, error } = await register(name, email, password)
-
-    if (error) {
-
-      return
-    }
-
-    setSession(session ?? null)
-    router.push("/dashboard")
   }
 
   return {
@@ -49,8 +35,6 @@ export function useRegister() {
     setEmail,
     password,
     setPassword,
-    confirmPassword,
-    setConfirmPassword,
     acceptTerms,
     setAcceptTerms,
     handleRegister,

@@ -16,8 +16,6 @@ export function RegisterForm() {
     setEmail,
     password,
     setPassword,
-    confirmPassword,
-    setConfirmPassword,
     acceptTerms,
     setAcceptTerms,
     handleRegister,
@@ -27,18 +25,13 @@ export function RegisterForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !password) {
       toast.error("Todos los campos son requeridos")
       return
     }
 
     if (password.length < 6) {
       toast.error("La contraseña debe tener al menos 6 caracteres")
-      return
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden")
       return
     }
 
@@ -97,21 +90,6 @@ export function RegisterForm() {
         <p className="text-xs text-slate-500">
           La contraseña debe tener al menos 6 caracteres
         </p>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-sm font-medium">
-          Confirmar contraseña
-        </Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          minLength={6}
-          className="h-11 rounded-md border-slate-200 focus-visible:ring-slate-400"
-        />
       </div>
       <div className="flex items-center space-x-2">
         <Checkbox
