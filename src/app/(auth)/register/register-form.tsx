@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useRegister } from "@/lib/hooks/use-register"
-
+import { useToast } from "@/lib/hooks/use-toast"
 
 export function RegisterForm() {
   const {
@@ -22,9 +22,36 @@ export function RegisterForm() {
     setAcceptTerms,
     handleRegister,
   } = useRegister()
+  const toast = useToast()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error("Todos los campos son requeridos")
+      return
+    }
+
+    if (password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres")
+      return
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden")
+      return
+    }
+
+    if (!acceptTerms) {
+      toast.error("Debes aceptar los términos y condiciones")
+      return
+    }
+
+    handleRegister(e)
+  }
 
   return (
-    <form onSubmit={handleRegister} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name" className="text-sm font-medium">
           Nombre completo
@@ -64,8 +91,12 @@ export function RegisterForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={6}
           className="h-11 rounded-md border-slate-200 focus-visible:ring-slate-400"
         />
+        <p className="text-xs text-slate-500">
+          La contraseña debe tener al menos 6 caracteres
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword" className="text-sm font-medium">
@@ -78,6 +109,7 @@ export function RegisterForm() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          minLength={6}
           className="h-11 rounded-md border-slate-200 focus-visible:ring-slate-400"
         />
       </div>
@@ -87,15 +119,12 @@ export function RegisterForm() {
           checked={acceptTerms}
           onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
         />
-        <label
+        <Label
           htmlFor="terms"
-          className="text-xs leading-none text-slate-600 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
-          Acepto los{" "}
-          <Link href="#" className="text-slate-800 hover:underline">
-            términos y condiciones
-          </Link>
-        </label>
+          Acepto los términos y condiciones
+        </Label>
       </div>
       <Button
         type="submit"

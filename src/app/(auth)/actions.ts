@@ -3,6 +3,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 export async function register(name: string, email: string, password: string) {
+  if (password.length < 6) {
+    return { error: "La contraseña debe tener al menos 6 caracteres" };
+  }
+
   const supabase = createSupabaseServerClient();
 
   const { data, error } = await supabase.auth.signUp({
